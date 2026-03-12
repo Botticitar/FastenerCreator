@@ -6,3 +6,4 @@ from src.stepgen_app.step_generator import #model generator class comes here
 
 app=FastAPI()
 
+@app.post
