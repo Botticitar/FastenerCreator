@@ -2,10 +2,11 @@ import cadquery as cq
 import pandas as pd
 import tempfile
 from pathlib import Path
+from stepgen_app.validator import WasherRequest, ScrewRequest
 
 class StepGenerator:            
     @staticmethod
-    def washer (data: RequestWasher) -> str:
+    def washer (data) -> str:
         washer = (
             cq.Workplane("XY")
             .circle(data.d_o/2)
@@ -18,7 +19,7 @@ class StepGenerator:
         return str(path)
 
     @staticmethod
-    def screw (data: RequestScrew) -> str:
+    def screw (data) -> str:
         headsizes ={'thread':  [3, 4, 5, 6, 8, 10, 12, 14, 16, 20, 24],
                     'head_height': [3, 4, 5, 6, 8, 10, 12, 14, 16, 20, 24],
                     'head_diameter': [5.5, 7, 8.5, 10, 13, 16, 18, 21, 24, 30, 36]} 
