@@ -15,6 +15,7 @@ dist/
 build/
 *.egg-info/
 *.spec
+*.step
 
 # Testing
 .pytest_cache/
