@@ -1,9 +1,15 @@
+import sys
 import multiprocessing
 import uvicorn
 import time
 import tkinter as tk
 from stepgen_app.main import app
 from stepgen_app.gui import FastenerApp
+import os
+
+if getattr(sys, 'frozen', False):
+    bundle_dir = sys._MEIPASS
+    os.chdir(bundle_dir)
 
 def start_backend():
     uvicorn.run(app, host="127.0.0.1", port=8080, log_level="info")

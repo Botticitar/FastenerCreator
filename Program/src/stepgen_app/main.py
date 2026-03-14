@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 import os
+import io
+import zipfile
 
-from stepgen_app import ScrewRequest, WasherRequest, StepGenerator
+from stepgen_app import ScrewRequest, WasherRequest, AssemblyRequest, StepGenerator
 
 app = FastAPI(title="Engineering STEP Generator")
 
@@ -40,3 +42,21 @@ async def create_washer(data: WasherRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/generate/assembly")
+async def generate_set(data: AssemblyRequest):
+    s_path = StepGenerator.screw(data.screw)
+    w_path = StepGenerator.washer(data.washer)
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+        zip_file.write(s_path, arcname="bolt.step")
+        zip_file.write(w_path, arcname="washer.step")
+    
+    zip_buffer.seek(0)
+
+    return StreamingResponse(
+        zip_buffer, 
+        media_type="application/x-zip-compressed",
+        headers={"Content-Disposition": "attachment; filename=assembly.zip"}
+    )

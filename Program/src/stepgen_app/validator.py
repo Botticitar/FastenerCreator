@@ -7,7 +7,8 @@ class ScrewRequest(BaseModel):
     
     @model_validator(mode='after')
     def validate_physics(self) -> 'ScrewRequest':
-        PhysicalValidator.check_screw_integrity(self)
+        PhysicalValidator.check_screw_diameter(self) #this MUST be called first if we are handling length and diameter functions separately
+        PhysicalValidator.check_screw_length(self)
         return self
     
 class WasherRequest(BaseModel):
@@ -23,3 +24,12 @@ class WasherRequest(BaseModel):
     model_config = {
         "populate_by_name": True
     }
+
+class AssemblyRequest(BaseModel):
+    screw: ScrewRequest
+    washer: WasherRequest
+
+    @model_validator(mode='after')
+    def validate_physics(self) -> 'AssemblyRequest':
+        PhysicalValidator.check_compatibility(self.screw, self.washer)
+        return self

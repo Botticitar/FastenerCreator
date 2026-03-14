@@ -10,3 +10,6 @@ class Standards:
                 #and would be validated in validator, but I wanna keep the .json structure as is in the challenge file    
     standards=pd.DataFrame(standards_table)
     
+    #We could for example extend this to use multiple screw types, washer types,
+    #an offset table for washer d_i in case of nominal d_i etc.
+ 
