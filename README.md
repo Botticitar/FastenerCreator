@@ -18,11 +18,15 @@ The application follows a modular, layered architecture to ensure maintainabilit
 
 The application is containerized using micromamba to ensure a stable CAD kernel environment and pre-configured system dependencies.
 
-# Build the image from the root directory:
-'''docker build -t fastener-app .'''
+# Build the image from the root directory
+```bash
+docker build -t fastener-app .
+```
 
 # Run the container (Mapping port 8080)
-'''docker run -p 8080:8080 fastener-app'''
+```bash
+docker run -p 8080:8080 fastener-app
+```
 
 ## Local Installation 
 
@@ -30,10 +34,14 @@ The application is containerized using micromamba to ensure a stable CAD kernel 
 For local use with the interactive GUI, the project is structured as an installable Python package via the src layout.
 
 # Install the project in editable mode with all dependencies:
-'''pip install -e .'''
+```bash
+pip install -e .
+```
 
 # Launch the unified application (starts Backend + GUI automatically)
-'''stepgen-app'''
+```bash
+stepgen-app
+```
 
 # Access
 Open your browser to http://127.0.0.1:8080. The application will attempt to auto-launch this page on start.
@@ -47,7 +55,7 @@ We utilize pytest to implement a multi-layered testing strategy:
     -Integration Tests:     Verifying API response codes and binary MIME types using TestClient.
     -Physical Validation:   Testing the AssemblyRequest cross-validator to prevent the generation of
                             physically   impossible hardware pairings.
-    -Run all tests:         '''pytest tests/'''
+    -Run all tests:         ```bash pytest tests/ ```
 
 ### API Endpoints
 Endpoint                Method  Input                                   Description
