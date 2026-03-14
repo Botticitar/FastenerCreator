@@ -13,7 +13,7 @@ def read_root():
     return {"status": "Server is running. Go to /docs for the GUI"}
 
 #Bolt Endpoint
-@app.post("/generate/screw")
+@app.post("/v1/generate/screw")
 async def create_screw(data: ScrewRequest):
     try:
         file_path = StepGenerator.screw(data)
@@ -30,7 +30,7 @@ async def create_screw(data: ScrewRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 #Washer Endpoint
-@app.post("/generate/washer")
+@app.post("/v1/generate/washer")
 async def create_washer(data: WasherRequest):
     try:
         file_path = StepGenerator.washer(data)
