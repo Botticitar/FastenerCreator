@@ -1,0 +1,26 @@
+[project]
+name = "stepgen_app"
+version = "0.1.0"
+description = "A FastAPI service to generate CAD STEP files using CadQuery"
+authors = [
+    {name = "Peter Maricza", email = "maricza.peter@gmail.com"}
+]
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "pandas",
+    "cadquery",
+]
+readme = "README.md"
+requires-python = ">=3.9"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+stepgen-app = "stepgen_app.launch:main"
