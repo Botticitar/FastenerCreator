@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+
+# Build and Packaging
+dist/
+build/
+*.egg-info/
+*.spec
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local configuration/OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# CAD temporary files
+*.log
