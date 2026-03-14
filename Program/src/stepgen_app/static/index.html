@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bosch Fastener Generator</title>
+    <style>
+        :root { --bosch-blue: #0056b3; --error-red: #d93025; --success-green: #188038; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 800px; }
+        .card { background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 25px; margin-bottom: 20px; }
+        h2 { margin-top: 0; color: var(--bosch-blue); border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .input-group { margin-bottom: 10px; }
+        label { display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px; color: #555; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: var(--bosch-blue); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 1em; margin-top: 10px; transition: opacity 0.2s; }
+        button:hover { opacity: 0.9; }
+        #console { background: #202124; color: #f1f3f4; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; min-height: 80px; max-height: 150px; overflow-y: auto; width: 100%; box-sizing: border-box; }
+        .error-text { color: #ff8a80; }
+        .success-text { color: #b7e1cd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>Screw Configuration</h2>
+            <div class="grid">
+                <div class="input-group">
+                    <label>Diameter (ISO Metric)</label>
+                    <input type="number" id="s_dia" value="10">
+                </div>
+                <div class="input-group">
+                    <label>Length (mm)</label>
+                    <input type="number" id="s_len" value="40">
+                </div>
+            </div>
+            <button onclick="generateSingle('/v1/generate/screw', 'screw')">Download Screw (.step)</button>
+        </div>
+
+        <div class="card">
+            <h2>Washer Configuration</h2>
+            <div class="grid">
+                <div class="input-group"><label>Inner ID</label><input type="number" id="w_in" value="10.5"></div>
+                <div class="input-group"><label>Outer ID</label><input type="number" id="w_out" value="20"></div>
+                <div class="input-group"><label>Thickness</label><input type="number" id="w_thk" value="2"></div>
+            </div>
+            <button onclick="generateSingle('/v1/generate/washer', 'washer')">Download Washer (.step)</button>
+        </div>
+
+        <div class="card" style="border-left: 5px solid var(--bosch-blue);">
+            <h2>Full Assembly (.zip)</h2>
+            <p style="font-size: 0.85em; color: #666;">Generates both components and validates fitment.</p>
+            <button onclick="generateAssembly()" style="background-color: #34a853;">Download Assembly Bundle</button>
+        </div>
+
+        <div id="console">Ready...</div>
+    </div>
+
+    <script>
+        const consoleLog = (msg, type) => {
+            const el = document.getElementById('console');
+            const colorClass = type === 'error' ? 'error-text' : (type === 'success' ? 'success-text' : '');
+            el.innerHTML = `<span class="${colorClass}">[${new Date().toLocaleTimeString()}] ${msg}</span><br>` + el.innerHTML;
+        };
+
+        async function handleDownload(response, defaultName) {
+            if (!response.ok) {
+                const errData = await response.json();
+                let errorMessage = "Error";
+
+                if (errData.detail && Array.isArray(errData.detail)) {
+                    errorMessage = errData.detail.map(e => e.msg).join(" | ");
+                } 
+                else if (errData.detail) {
+                    errorMessage = errData.detail;
+                }
+
+                throw new Error(errorMessage);
+            }
+    
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = defaultName;
+            document.body.appendChild(a);
+            a.click();
+            consoleLog(`Success: ${defaultName} downloaded.`, 'success');
+        }
+        async function generateSingle(url, type) {
+            try {
+                const body = type === 'screw' 
+                    ? { diameter: parseFloat(document.getElementById('s_dia').value), length: parseFloat(document.getElementById('s_len').value) }
+                    : { inner_diameter: parseFloat(document.getElementById('w_in').value), outer_diameter: parseFloat(document.getElementById('w_out').value), thickness: parseFloat(document.getElementById('w_thk').value) };
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(body)
+                });
+                await handleDownload(response, `${type}.step`);
+            } catch (e) { consoleLog(e.message, 'error'); }
+        }
+
+        async function generateAssembly() {
+            try {
+                const body = {
+                    screw: { diameter: parseFloat(document.getElementById('s_dia').value), length: parseFloat(document.getElementById('s_len').value) },
+                    washer: { inner_diameter: parseFloat(document.getElementById('w_in').value), outer_diameter: parseFloat(document.getElementById('w_out').value), thickness: parseFloat(document.getElementById('w_thk').value) }
+                };
+                const response = await fetch('/v1/generate/assembly', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(body)
+                });
+                await handleDownload(response, "assembly_bundle.zip");
+            } catch (e) { consoleLog(e.message, 'error'); }
+        }
+    </script>
+</body>
+</html>
