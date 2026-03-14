@@ -20,7 +20,7 @@ COPY --chown=micromamba:micromamba ./src /app/src
 
 ENV PYTHONPATH="${PYTHONPATH}:/app/src"
 
-EXPOSE 8000
+EXPOSE 8080
 
 
 CMD ["micromamba", "run", "-n", "base", "uvicorn", "stepgen_app.main:app", "--host", "0.0.0.0", "--port", "8080"]
