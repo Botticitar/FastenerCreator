@@ -35,7 +35,10 @@ For local use with the interactive GUI, the project is structured as an installa
 # Launch the unified application (starts Backend + GUI automatically)
 '''stepgen-app'''
 
-Interactive FastAPI Swagger documenteation will be accessible on the following URL:
+# Access
+Open your browser to http://127.0.0.1:8080. The application will attempt to auto-launch this page on start.
+
+Interactive FastAPI Swagger documentation will be accessible on the following URL:
 http://127.0.0.1:8080/docs
 
 ### Testing Strategy

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 import os
 import io
 import zipfile
@@ -7,6 +8,20 @@ import zipfile
 from stepgen_app import ScrewRequest, WasherRequest, AssemblyRequest, StepGenerator
 
 app = FastAPI(title="Engineering STEP Generator")
+
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(CURRENT_DIR, "static")
+
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+@app.get("/")
+async def read_gui():
+    """Serves the Web GUI home page."""
+    index_path = os.path.join(STATIC_DIR, "index.html")
+    if not os.path.exists(index_path):
+        return {"status": "Backend running, but static/index.html is missing."}
+    return FileResponse(index_path)
 
 @app.get("/")
 def read_root():
@@ -42,21 +57,25 @@ async def create_washer(data: WasherRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
-@app.post("/generate/assembly")
+
+#Assembly Endpoint    
+@app.post("/v1/generate/assembly") 
 async def generate_set(data: AssemblyRequest):
-    s_path = StepGenerator.screw(data.screw)
-    w_path = StepGenerator.washer(data.washer)
+    try:
+        s_path = StepGenerator.screw(data.screw)
+        w_path = StepGenerator.washer(data.washer)
 
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
-        zip_file.write(s_path, arcname="bolt.step")
-        zip_file.write(w_path, arcname="washer.step")
-    
-    zip_buffer.seek(0)
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+            zip_file.write(s_path, arcname="bolt.step")
+            zip_file.write(w_path, arcname="washer.step")
+        
+        zip_buffer.seek(0)
 
-    return StreamingResponse(
-        zip_buffer, 
-        media_type="application/x-zip-compressed",
-        headers={"Content-Disposition": "attachment; filename=assembly.zip"}
-    )
+        return StreamingResponse(
+            zip_buffer, 
+            media_type="application/x-zip-compressed",
+            headers={"Content-Disposition": "attachment; filename=assembly.zip"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
